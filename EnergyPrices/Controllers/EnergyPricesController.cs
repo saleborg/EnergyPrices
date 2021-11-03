@@ -9,6 +9,7 @@ using EnergyPrices.Data;
 using EnergyPrices.Models;
 using AutoMapper;
 using EnergyPrices.Dtos;
+using EnergyPrices.SyncService;
 
 namespace EnergyPrices.Controllers
 {
@@ -29,9 +30,11 @@ namespace EnergyPrices.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<EnergyPriceReadDTO>> GetEnergyPrices()
         {
-            IEnumerable<EnergyPrice> energyPrices = new List<EnergyPrice>();
-            energyPrices.Append(new EnergyPrice());
-            return Ok(_mapper.Map<IEnumerable<EnergyPriceReadDTO>>(energyPrices));
+
+            EnergyPriceSync sync = new EnergyPriceSync();
+            Task<IEnumerable<EnergyPriceReadDTO>> returnFromWebEnergyPrices = sync.RetriveDataFromAPIAsync();
+
+            return Ok(returnFromWebEnergyPrices.Result);
         }
     }
 }
