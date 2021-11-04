@@ -13,7 +13,7 @@ using EnergyPrices.SyncService;
 
 namespace EnergyPrices.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/EnergyPrices")]
     [ApiController]
     public class EnergyPricesController : Controller
     {
@@ -32,9 +32,10 @@ namespace EnergyPrices.Controllers
         {
 
             EnergyPriceSync sync = new EnergyPriceSync();
-            Task<IEnumerable<EnergyPriceReadDTO>> returnFromWebEnergyPrices = sync.RetriveDataFromAPIAsync();
+            var respons = sync.MakeRequest();
 
-            return Ok(returnFromWebEnergyPrices.Result);
+
+            return Ok(respons);
         }
     }
 }

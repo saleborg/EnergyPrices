@@ -1,11 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace EnergyPrices.Dtos
+﻿namespace EnergyPrices.Dtos
 {
-    public class EnergyPriceReadDTO
+    public class EnergyPriceCreateDTO
     {
-
-        public string Id { get; set; }
         public string Date { get; set; }
 
         public string BidArea { get; set; }
@@ -13,10 +9,9 @@ namespace EnergyPrices.Dtos
         public string Contract { get; set; }
 
         public string Supplier { get; set; }
-        
+
         public string PriceOrePerKwh { get; set; }
 
         public string ContractName { get; set; }
-
     }
 }
