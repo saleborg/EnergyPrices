@@ -9,6 +9,7 @@ namespace EnergyPrices.Profiles
         public EnergyPriceProfile()
         {
             CreateMap<EnergyPrice, EnergyPriceReadDTO>();
+            CreateMap<EnergyPriceCreateDTO, EnergyPrice>().ForMember(x => x.Id, opt => opt.Ignore());
         }
         
 

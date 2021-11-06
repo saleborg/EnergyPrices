@@ -17,12 +17,12 @@ namespace EnergyPrices.Controllers
     [ApiController]
     public class EnergyPricesController : Controller
     {
-        private readonly EnergyPricesContext _context;
+        private readonly IEnergyPriceRepo repo;
         private readonly IMapper _mapper;
 
-        public EnergyPricesController(EnergyPricesContext context, IMapper mapper)
+        public EnergyPricesController(IEnergyPriceRepo repo, IMapper mapper)
         {
-            _context = context;
+            this.repo = repo;
             this._mapper = mapper;
         }
 
@@ -32,10 +32,8 @@ namespace EnergyPrices.Controllers
         {
 
             EnergyPriceSync sync = new EnergyPriceSync();
-            var respons = sync.MakeRequest();
-
-
-            return Ok(respons);
+            var respons = sync.MakeRequest(_mapper, repo, 0);
+            return Ok(repo.GetAllEnergyPrices());
         }
     }
 }
