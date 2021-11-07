@@ -14,48 +14,27 @@ namespace EnergyPrices.SyncService
     public class EnergyPriceSync
     {
         string url = "https://ei.entryscape.net/rowstore/dataset/";
-        string urlParameters = "8db5a77c-ef90-49f0-8e2f-18327735c463? _limit = 100 & _offset = ";
-        IList<EnergyPriceCreateDTO> energyPrices = new List<EnergyPriceCreateDTO>();
+        string urlParameters = "8db5a77c-ef90-49f0-8e2f-18327735c463? _limit = 100 & _offset=30000 ";
+       
 
 
-        public IList<EnergyPriceCreateDTO> MakeRequest(IMapper _mapper, IEnergyPriceRepo repo, int offset)
+        public void MakeRequest(IMapper _mapper, IEnergyPriceRepo repo)
         {
+            IList<EnergyPriceCreateDTO> energyPrices = new List<EnergyPriceCreateDTO>();
             HttpClient client = new HttpClient();
             client.BaseAddress = new Uri(url);
 
             client.DefaultRequestHeaders.Accept.Add(
            new MediaTypeWithQualityHeaderValue("application/json"));
 
-            HttpResponseMessage response = client.GetAsync(urlParameters + offset).Result;
+            HttpResponseMessage response = client.GetAsync(urlParameters).Result;
             if (response.IsSuccessStatusCode)
             {
-      
-                var root = response.Content.ReadAsAsync<Root>().Result;
-
-                foreach (var price in root.results)
+                Root root = getDataFromCall(_mapper, repo, response);
+                while (root.next != null)
                 {
-
-                    EnergyPriceCreateDTO energyPriceCreateDTO = new EnergyPriceCreateDTO()
-                    {
-                        BidArea = price.bid_area,
-                        Contract = price.contract,
-                        ContractName = price.contract_name,
-                        Supplier = price.supplier,
-                        Date = price.date,
-                        PriceOrePerKwh = price.price_ore_per_kwh
-                    };
-                    energyPrices.Add(energyPriceCreateDTO);
-                }
-
-                foreach (var price in energyPrices)
-                {
-                    var energyPrice = _mapper.Map<EnergyPrice>(price);
-                    repo.CreateEnergyPrice(energyPrice);
-                    repo.SaveChange();
-                }
-                if(offset< root.resultCount && offset < 500)
-                {
-                    MakeRequest(_mapper, repo, offset+=100);
+                    response = client.GetAsync(root.next).Result;
+                    root = getDataFromCall(_mapper, repo, response);
                 }
             }
             else
@@ -64,7 +43,29 @@ namespace EnergyPrices.SyncService
             }
             client.Dispose();
 
-            return energyPrices;
+            
+        }
+
+        private static Root getDataFromCall(IMapper _mapper, IEnergyPriceRepo repo, HttpResponseMessage response)
+        {
+            var root = response.Content.ReadAsAsync<Root>().Result;
+            foreach (var price in root.results)
+            {
+                EnergyPriceCreateDTO energyPriceCreateDTO = new EnergyPriceCreateDTO()
+                {
+                    BidArea = price.bid_area,
+                    Contract = price.contract,
+                    ContractName = price.contract_name,
+                    Supplier = price.supplier,
+                    Date = price.date,
+                    PriceOrePerKwh = price.price_ore_per_kwh
+                };
+                var energyPrice = _mapper.Map<EnergyPrice>(energyPriceCreateDTO);
+                repo.CreateEnergyPrice(energyPrice);
+                repo.SaveChange();
+            }
+
+            return root;
         }
     }
 

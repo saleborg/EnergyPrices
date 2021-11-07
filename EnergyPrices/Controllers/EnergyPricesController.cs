@@ -30,9 +30,7 @@ namespace EnergyPrices.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<EnergyPriceReadDTO>> GetEnergyPrices()
         {
-
             EnergyPriceSync sync = new EnergyPriceSync();
-            var respons = sync.MakeRequest(_mapper, repo, 0);
             return Ok(repo.GetAllEnergyPrices());
         }
     }
